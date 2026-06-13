@@ -63,52 +63,57 @@ export default function DetailScreen({ route }: Props) {
 
   
   const abrirCamara = async () => {
-    setMostrarMenu(false); // Cierro el menú
-
-    
-    const permisoCamara = await ImagePicker.requestCameraPermissionsAsync();
-    const permisoGaleria = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (!permisoCamara.granted || !permisoGaleria.granted) {
-      Alert.alert('Ojo', 'Necesito permiso para acceder a la cámara y fotos');
-      return;
-    }
-
-    
-    const resultado = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,    // Permite recortar después
-      aspect: [4, 3],         // Formato de la foto
-      quality: 0.7            // Calidad para que no pese mucho
-    });
-
-    if (!resultado.canceled) {
-      setFotoPropia(resultado.assets[0].uri); // Guardo la foto tomada
-    }
-  };
-
+  setMostrarMenu(false);
   
-  const abrirGaleria = async () => {
-    setMostrarMenu(false); // Cierro el menú
+  // Pedir permisos bien
+  const permisoCamara = await ImagePicker.requestCameraPermissionsAsync();
+  const permisoGaleria = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    
-    const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permiso.granted) {
-      Alert.alert('Ojo', 'Necesito permiso para ver tus fotos');
-      return;
-    }
+  if (!permisoCamara.granted || !permisoGaleria.granted) {
+    Alert.alert('Permisos', 'Debes permitir acceso a cámara y fotos');
+    return;
+  }
 
-    
-    const resultado = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  try {
+    const resultado = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.7
+      quality: 0.5 
     });
 
     if (!resultado.canceled) {
       setFotoPropia(resultado.assets[0].uri);
     }
-  };
+  } catch (error) {
+    Alert.alert('Error', 'No se pudo tomar la foto');
+  }
+};
+
+
+const abrirGaleria = async () => {
+  setMostrarMenu(false);
+  
+  const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!permiso.granted) {
+    Alert.alert('Permiso', 'Debes permitir acceso a tus fotos');
+    return;
+  }
+
+  try {
+    const resultado = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.5 
+    });
+
+    if (!resultado.canceled) {
+      setFotoPropia(resultado.assets[0].uri);
+    }
+  } catch (error) {
+    Alert.alert('Error', 'No se pudo cargar la imagen');
+  }
+};
 
   
   const agregarAFavoritos = async () => {
@@ -119,7 +124,7 @@ export default function DetailScreen({ route }: Props) {
         idMeal: receta.idMeal,
         nombre: receta.strMeal,
         imagenUrl: receta.strMealThumb,
-        fotoUsuario: fotoPropia // Aquí guardo la foto (sea de cámara o galería)
+        fotoUsuario: fotoPropia 
       });
 
       setEsFav(true);
